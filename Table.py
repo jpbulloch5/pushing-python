@@ -1,7 +1,8 @@
 
-from typing import OrderedDict
+
 
 class Table:
+    
     '''
     A table is a list of records.  A Table has a set of categories that are valid for
     the fields in each record.
@@ -11,9 +12,10 @@ class Table:
     '''
     
 
-    def __init__(self, initial_record: OrderedDict = None, explicit_categories: set = None) -> None:
+    def __init__(self, initial_record: dict = None, explicit_categories: set = None) -> None:
         # these constants are to improve the readability of the list comprehension when extracting
         # the categories from a record when categories were not explicitly provided
+        from typing import OrderedDict
         FIRST_RECORD = 0            # access the first record in the records tuple
         EXTRACT_LIST_CONTENTS = 0   # extract the nested contents from a list
 
@@ -78,16 +80,20 @@ class Table:
     def categories(self):
         return self.__categories
 
-    def add_records(self, *records_to_add: OrderedDict or tuple):
+    def add_records(self, *records_to_add: dict or tuple):
         '''
         Adds one or more records to the Table.
 
         Parameter
         ---------
-        *records : OrderedDict or iterable of OrderdDicts
+        *records : nested dicts, or tuples
             The records to be added to the table
-            Record Syntax : nested dicts
+            Syntax : nested dicts
                 {primary_key: {category_1: data_1, category_2: data_2}}
+            Syntax : tuples
+                (primary_key, data_1, data_2)
+                    When using tuples, the categories are extracted from the Table categories and mapped in order
+                    
         '''
         EXTRACT_LIST_CONTENTS = 0
         PRIMARY_KEY_FROM_TUPLE = 0
@@ -132,10 +138,11 @@ class Table:
 #Testing code:
 #######################################################
 if __name__ == '__main__':
+    #from typing import OrderedDict
     import datetime
-
-    record_example_1: OrderedDict = {1: {'Last Name': 'Doe', 'First Name': 'John', 'Major': 'Computer Science', 'Date of Hire': datetime.date(2021,1,12), 'Salary': 45_000}}
-    record_example_2: OrderedDict = {2: {'Last Name': 'Lee', 'First Name': 'Bruce', 'Major': 'Physical Education', 'Date of Hire': datetime.date(1980,10,15), 'Salary': 280_000}}
+    Table
+    record_example_1: dict = {1: {'Last Name': 'Doe', 'First Name': 'John', 'Major': 'Computer Science', 'Date of Hire': datetime.date(2021,1,12), 'Salary': 45_000}}
+    record_example_2: dict = {2: {'Last Name': 'Lee', 'First Name': 'Bruce', 'Major': 'Physical Education', 'Date of Hire': datetime.date(1980,10,15), 'Salary': 280_000}}
     tuple_record_example: tuple = (3, 'Musk', 'Elon', '-No Degree-', datetime.date(2020, 12, 25), 20_000)
     table_example = Table(record_example_1)
     table_example.add_records(record_example_2)

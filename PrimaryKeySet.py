@@ -1,6 +1,6 @@
 import sys
 
-class ID:
+class PrimaryKey:
     ''' This class creates an integer with a built-in left zero padding behavior
         for display.  It is otherwise treated as a normal integer.  It is meant
         to be used with the ID_Set class.
@@ -98,7 +98,7 @@ class FailureToSetHigherMinimum(Exception):
     def __init__(self, intended_minimum: int, violation: int) -> None:
         super().__init__(f'\nERROR: At least one existing ID in the ID_Set ({violation}) was < the desired minimum of {intended_minimum}.  The minimum could not be raised.')
 
-class ID_Set:
+class PrimaryKeySet:
     def __init__(self, minimum_valid_id: int = 1, maximum_valid_id: int = sys.maxsize) -> None:
         '''
         This class creates an ID_Set object, which defines a set of unique ID objects within 
