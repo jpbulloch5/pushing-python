@@ -1,4 +1,5 @@
 
+from typing import OrderedDict
 
 class Table:
     '''
@@ -10,12 +11,16 @@ class Table:
     '''
     
 
-    def __init__(self, *records: dict, categories: set = None) -> None:
-        FIRST_RECORD = 0
+    def __init__(self, *records: OrderedDict, categories: set = None) -> None:
+        # these constants are to improve the readability of the list comprehension when extracting
+        # the categories from a record when categories were not explicitly provided
+        FIRST_RECORD = 0            # access the first record in the records tuple
+        EXTRACT_LIST_CONTENTS = 0   # extract the nested contents from a list
 
         self.__primary_key_set: set = set()
-        self.__categories: set = set()
-        self.__records: dict = dict()
+        self.__categories_set: set = set()
+        self.__categories: tuple = tuple()
+        self.__records: OrderedDict = OrderedDict()
 
         # if table categories were explicitly provided...
         if categories:
@@ -25,11 +30,20 @@ class Table:
 
         # otherwise, check if at least one record was provided...
         elif records:
-
-            self.__categories = set(category for category in [field for field in records[FIRST_RECORD].values()][0].keys())
-   
             # and assign the categories using the first record as a template
-            #self.__categories = set(field_category for field_category in records[0].values())
+            # Remember: category refers to the key of a field dict, which is, in turn, in the value of a record dict.
+            #   records = {primary_key_1: fields_1, primary_key_2: fields_2, ..., primary_key_n: fields_n}
+            #       fields = {category_1: data_1, category_2: data_2, ..., category_n: data_n}
+            #   therefore, if we extract the keys of the values of the record, we get our set of categories
+            #   NOTE: because the OrderedDict.values() method
+            category_list = []
+            for category in list(records[FIRST_RECORD].values())[EXTRACT_LIST_CONTENTS].keys():
+                if category not in self.__categories:
+                    self.__categories_set.add(category)
+                    category_list.append(category)
+                else:
+                    raise SyntaxError(f'ERROR: All categories (columns) in a Table object must be unique.\n See "{category}".')
+            self.__categories = tuple(category_list)
             
         # otherwise...
         else:
@@ -49,7 +63,6 @@ class Table:
             heading += str(field)+ '\t'
 
         body = '\n'
-        print(f'line 50: {self.__records}')
         for primary_key, fields in self.__records[0].items():
             body += f'{primary_key}\t'
             for data in fields.values():
@@ -92,7 +105,7 @@ class Table:
 if __name__ == '__main__':
     import datetime
 
-    record_example: dict = {1: {'Last Name': 'Doe', 'First Name': 'John', 'Major': 'Computer Science', 'Date of Hire': datetime.date(2021,1,12), 'Salary': 45_000}}
+    record_example: OrderedDict = {1: {'Last Name': 'Doe', 'First Name': 'John', 'Major': 'Computer Science', 'Date of Hire': datetime.date(2021,1,12), 'Salary': 45_000}}
     table_example = Table(record_example)
     print(table_example)
 
