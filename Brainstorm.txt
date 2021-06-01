@@ -3,90 +3,62 @@ Asset Management System
 
 Basic Functionality: (i.e., quick and dirty minimum functionality)
 --------------------
-- database is read from a file into a Python datastructure
-- Python datastructure is written into a database file
-- add entry
-    - menu-driven querry
-    - from file
-- remove entry
-- update entry
+- create a new database file
+- read/write database from/to a file and to/from a Python data structure (pickle)
+- add record
+    - menu-driven query
+    - from file
+- remove record
+- update record
 - search by key
+- automatically generate unique primary keys for each record
 - display database to terminal
-- each row in the database is an instance of the Asset_Entry object
 - interface is text-based and menu-driven
+- can produce asset replacement reports
+    - What assets will reach their expected replacement date between the present and some deadline
+    - Projected cost of replacing expiring assets
 
-Advanced Functionality: (i.e., things I believe I can implement using current skills/knowledge to improve the product)
+
+Advanced Functionality: (i.e., things I believe I can implement using current skills/knowledge to improve the product, but will take more time)
 -----------------------
 - Allow terminal-driven access to full functionality
-    - all functionality is accessable via argument passing
-    - menu-driven interface displayed when no arguments are provided
-    - useage statement is displayed when unexpected/erroneous arguments are provided
+    - all functionality is accessible via argument passing
+    - menu-driven interface displayed when no arguments are provided
+    - usage statement is displayed when unexpected/erroneous arguments are provided
 - display database (full, partial) formatted
-    - output to terminal
-    - output to file
+    - output to terminal
+    - output to file
 - request assessments/reports
-    - Costs expected in a given timeframe (this month, within 3 months, by given date, etc)
-    - List expected re-purchases, include purchase location for re-purchase assistance
-	- restrict by any 
+    - Costs expected in a given timeframe (this month, within 3 months, by given date, etc)
+    - List expected re-purchases, including purchase location for re-purchase assistance
 
 
 Future Functionality: (i.e., things I don't know how to implement, but hope to learn)
 ---------------------
 - Automate periodic reports; generate email or similar notification
 - Facilitate re-orders
-    - pull information from websites for current cost to re-order for web purchases
-    - search web for information on in-store and mail-ordered purchases
-    - allow purchase authorization via email (link click?) from authorized source
-        - complete purchase with a one-click (or very simple) authorization
-	    - validate credentials to ensure that the purchase request was authorized appropriately prior to ordering
-- Initialize database into Python datastructure only when using the menu-driven interface
-    - begin initialization on separate thread immediately before entering menu-driven interface
-	- assumes multiple actions will be taken
-	- loading the database into Python data structures will allow quicker manipulation by only reading/writing to the file at the beginning/end of the session
-	    - QUESTION: when is it faster to overwrite the entire database from the Python datastructure rather than making comparisons and updating?  Is it always faster to update the file as we go?
-    - access file contents directly for command-line access
-	- assumes only a single action will be taken
-	- reading from/writing to the files directly saves time 
+    - pull information from websites for current cost to re-order for web purchases
+    - search web for information on in-store and mail-ordered purchases
+    - allow purchase authorization via email (link click?) from an authorized source
+        - complete purchase with a one-click (or very simple) authorization
+    - validate credentials to ensure that the purchase request was authorized appropriately before ordering
+- Initialize database in to Python data structure only when using the menu-driven interface
+    - begin initialization on a separate thread immediately before entering the menu-driven interface
+- assumes multiple actions will be taken
+- loading the database in to Python data structures will allow quicker manipulation by only reading/writing to the file at the beginning/end of the session
+    - QUESTION: when is it faster to overwrite the entire database from the Python data structure rather than making comparisons and updating?  Is it always faster to update the file as we go?
+    - access file contents directly for command-line access
+- assumes only a single action will be taken
+- reading from/writing to the files directly saves time
+
 
 Basic Database Design Elements:
 -------------------------------
-- Table<list>; needs to support adding, deleting, inserting entries
-    - Entry<dict>; needs to support searching by key value {Entry_ID: Entry_Information}
-        - Entry_ID<int>; auto-generated and deconflicted when item added to the database
-        - Entry_Information<tuple>; stores the immutable information in the remainder of the row
-            - Item_Description<str>; free-form description of entry
-            - Item_Location<str>; Short description of item's location, from Valid_Locations set (see below)
-            - Purchase_Expense<float>; original purchase expense
-            - Purchase_Date<date>; the date the asset was purchased
-            - Expected Useful Life; int; expressed in months
-    - *CALC* Expected Replacement Date; date(mm/dd/yyyy); Purchase Date + Expected Useful Life
-    - *CALC* Remaining Useful Life; int; expressed in months; from present to Expected Replacement Date updates on monthly anniversary of purchase (i.e., the same day of the month); NOTE: or nearest valid day to account for leap year, 30 vs 31-day months, etc.
-    - *CALC* Depreciation Expense; float($); ratio of Initial Expense and Remaining Useful Life; rounded up (ceil)
-
-Advanced Database Design Elements: (to support advance functioniality)
-----------------------------------
-- Table 
-    -Entry_Information
-        - Purchase
-            - Purchase_ID
-            - Purchase_Vendor<str>; Formal name of vendor
-            - Purchase_Type; str; web, in-store, mail
-            - Purchase_Location; str; URL for online purchases, physical address for in-store purchases, order-form submission address for mail-ordered purchases
-            - Purchase_Reciept; str; either a URL to the purchase history, or a path to a file (e.g., scanned image or physical receipt)
-            - Authorized_Purchasers; tuple; all authorized purchasers
-            - Employee<dict>;  
-- Valid_Locations<set>; specify valid entries for the location of an asset in the database
-    - Location<dict>;
-        - Location_ID<int>;
-        - Location_Description<str>
-- Valid_Purchasers<set>;
-- Valid_Vendors<set>;
-- Employees<set>
-    - Employee<dict>
-        - Employee_ID<int>
-        - Employee_Information<tuple>
-            - Employee_Name<str>
-            - Employee_Job<str>
-
-list[dict{int: tuple(str, str, dict{int, tuple(date, str, str, str, str)}, int, )}]
-Database<dict>[{Entry_ID<int>: Entry_Information<tuple>(Entry_Description<str>, Location<str>, Purchase_Information<dict>{Purchase_ID<int>: (Purchase_Date<date>, Purchase_Vendor<str>, Purchase_Type<str>, Purchase_Location<str> Purchase_Reciept<str>, Authorized_Purchasers<tuple>())}, Expected_Useful_Life<int>)}]
+- Table object
+    - Table.records: dict{primary_key: fields}
+- primary_key is a set of unique identifiers for the dict, used for identifying each record
+- fields: dict{category_key: value}
+    - category_key matches with a table-level category; like the columns in a table; each record must have each table-level category, although the value associated may be None
+    - value is the data associated with the category and record in question
+    - Table Methods:
+- Keep it general, do not include functionality that is unique to Asset Management
