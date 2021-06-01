@@ -11,7 +11,7 @@ class Table:
     '''
     
 
-    def __init__(self, *records: OrderedDict, categories: set = None) -> None:
+    def __init__(self, initial_record: OrderedDict, explicit_categories: set = None) -> None:
         # these constants are to improve the readability of the list comprehension when extracting
         # the categories from a record when categories were not explicitly provided
         FIRST_RECORD = 0            # access the first record in the records tuple
@@ -23,13 +23,14 @@ class Table:
         self.__records: OrderedDict = OrderedDict()
 
         # if table categories were explicitly provided...
-        if categories:
+        if explicit_categories:
 
             # assign them
-            self.__categories = categories
-
-        # otherwise, check if at least one record was provided...
-        elif records:
+            self.__categories = explicit_categories
+            
+            
+        # otherwise...
+        else:
             # and assign the categories using the first record as a template
             # Remember: category refers to the key of a field dict, which is, in turn, in the value of a record dict.
             #   records = {primary_key_1: fields_1, primary_key_2: fields_2, ..., primary_key_n: fields_n}
@@ -37,67 +38,91 @@ class Table:
             #   therefore, if we extract the keys of the values of the record, we get our set of categories
             #   NOTE: because the OrderedDict.values() method
             category_list = []
-            for category in list(records[FIRST_RECORD].values())[EXTRACT_LIST_CONTENTS].keys():
+            for category in list(initial_record.values())[EXTRACT_LIST_CONTENTS].keys():
                 if category not in self.__categories:
                     self.__categories_set.add(category)
                     category_list.append(category)
                 else:
                     raise SyntaxError(f'ERROR: All categories (columns) in a Table object must be unique.\n See "{category}".')
             self.__categories = tuple(category_list)
-            
-        # otherwise...
-        else:
-
-            # raise a syntax error and teach the user how to call the constructor correctly
-            raise SyntaxError('ERROR: If no records are provided for the Table object constructor call, then table categories (columns) must be provided explicitly.')
-
-        self.__records = records
+        
+        initial_primary_key = list(initial_record.keys())[EXTRACT_LIST_CONTENTS]
+        initial_fields = list(initial_record.values())[EXTRACT_LIST_CONTENTS]
+        self.__records[initial_primary_key] = initial_fields
+        self.__primary_key_set.add(initial_primary_key)
 
     # END __init__()
 
     def __str__(self):
         
         # store the formatted heading line because we will need it's length to generate a separater line
-        heading = '#\t'
+        heading = f'{"#":5s}\t'
         for field in self.__categories:
-            heading += str(field)+ '\t'
+            heading += f'{str(field):20s} \t'
 
-        body = '\n'
-        for primary_key, fields in self.__records[0].items():
-            body += f'{primary_key}\t'
+        body = ''
+        for primary_key, fields in self.__records.items():
+            body += f'\n{str(primary_key):5s}\t'
             for data in fields.values():
-                body += f'{data}\t'
-            body += '\n'
+                body += f'{str(data):20s}\t'
 
         # start a new line and output the heading as a row of text with a row of '=' characters to
         # separate the heading from the records in the table, then add each new record as a new line, 
         # plus an extra blank line at the end
-        return f'\n{heading}\n{"=" * len(heading)}\n{body}\n'
+        return f'\n{heading}\n{"=" * len(self.__categories)*23}{body}\n'
     # END __str__()
 
-    def get_categories(self):
+    @property
+    def categories(self):
         return self.__categories
 
-    def add_records(self, *records):
+    def add_records(self, *records_to_add: OrderedDict):
         '''
         Adds one or more records to the Table.
 
-        Record Syntax:
-        -------------
-        dict{any unique: dict{any in table-category set: any}}
-        {primary_key: {category: data}}
+        Parameter
+        ---------
+        *records : OrderedDict or iterable of OrderdDicts
+            The records to be added to the table
+            Record Syntax : nested dicts
+                {primary_key: {category_1: data_1, category_2: data_2}}
         '''
+        EXTRACT_LIST_CONTENTS = 0
         
-        # check if any of the primary keys in the records being added are already in the Table's primary key set
-        if any(primary_key in self.__primary_key_set for primary_key in records.keys()):
-            raise KeyError('ERROR: Cannot insert a record into the table if the primary key of that record already exists in the table.')
-        
-        if not all(field_category in self.__categories for field_category in records.values().keys()):
-            raise KeyError('ERROR: Cannot insert a record into the table if the field categories do not match the table categories.')
-        pass
+        for column, record_to_add in enumerate(records_to_add):
+            print(type(record_to_add))
 
-    def record_is_valid(self, record_to_check) -> bool:
-        pass
+            # right now I assume an ordered dict as input, but I want to be able to accept a tuple as well
+            if isinstance(record_to_add, dict):
+                primary_key_to_add = list(record_to_add.keys())[EXTRACT_LIST_CONTENTS]
+                fields_to_add = list(record_to_add.values())[EXTRACT_LIST_CONTENTS]
+
+                if primary_key_to_add not in self.__primary_key_set:
+                    if all([category in self.__categories for category in list(fields_to_add.keys())]):
+                        self.__records[primary_key_to_add] = fields_to_add
+                    else:
+                        raise SyntaxError('ERROR: The record you attempted to add does not contain the same categories as the table.')
+                else:
+                    raise SyntaxError('ERROR: The record you attempted to add does not have a uniqe primary key.')
+
+            # if the user passed a tuple
+            elif isinstance(record_to_add, tuple):
+                records_to_add = records_to_add[EXTRACT_LIST_CONTENTS]
+                print(f'records: {records_to_add}')
+                if len(records_to_add) == len(self.__categories) + 1:
+                    primary_key_to_add = record_to_add[0]
+                    fields_to_add = {self.__categories[column]: record_to_add[column]}
+                    print(f'fields: {fields_to_add}')
+
+                else:
+                    raise SyntaxError('ERROR: The record you attempted to add does not contain the same categories as the table.')
+            else:
+                raise TypeError("ERROR: Record to add to the table must be an dict or tuple type.")
+
+            
+            
+
+
 
 #######################################################
 #Testing code:
@@ -105,8 +130,12 @@ class Table:
 if __name__ == '__main__':
     import datetime
 
-    record_example: OrderedDict = {1: {'Last Name': 'Doe', 'First Name': 'John', 'Major': 'Computer Science', 'Date of Hire': datetime.date(2021,1,12), 'Salary': 45_000}}
-    table_example = Table(record_example)
+    record_example_1: OrderedDict = {1: {'Last Name': 'Doe', 'First Name': 'John', 'Major': 'Computer Science', 'Date of Hire': datetime.date(2021,1,12), 'Salary': 45_000}}
+    record_example_2: OrderedDict = {2: {'Last Name': 'Lee', 'First Name': 'Bruce', 'Major': 'Physical Education', 'Date of Hire': datetime.date(1980,10,15), 'Salary': 280_000}}
+    tuple_record_example: tuple = (3, 'Musk', 'Elon', '-No Degree-', datetime.date(2020, 12, 25), 20_000)
+    table_example = Table(record_example_1)
+    table_example.add_records(record_example_2)
+    table_example.add_records(tuple_record_example)
     print(table_example)
 
     '''
