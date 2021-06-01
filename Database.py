@@ -20,7 +20,7 @@ class Table:
         for record_primary_key, record_field in records:
             if (record_primary_key not in self.__primary_key_set    # if the record has a unique primary key
             and record_field.keys() in self.__categories):          # and the field category is also a table category
-                
+                pass
 
         self.__categories: set = categories
     # END __init__()
