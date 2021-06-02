@@ -1,8 +1,6 @@
-
-
+from typing import OrderedDict
 
 class Table:
-    
     '''
     A table is a list of records.  A Table has a set of categories that are valid for
     the fields in each record.
@@ -10,12 +8,11 @@ class Table:
         fields<dict> = {category_1<any>: data_1<any>, category_2<any>: data_2<any>}
             ***categories within the fields MUST correspond with a category in the Table
     '''
-    
 
     def __init__(self, initial_record: dict = None, explicit_categories: set = None) -> None:
         # these constants are to improve the readability of the list comprehension when extracting
         # the categories from a record when categories were not explicitly provided
-        from typing import OrderedDict
+        
         FIRST_RECORD = 0            # access the first record in the records tuple
         EXTRACT_LIST_CONTENTS = 0   # extract the nested contents from a list
 
