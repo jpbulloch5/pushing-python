@@ -4,16 +4,20 @@ class Menu:
 
         '''
         self.__prompt = prompt
-        self.__options = options
+        self.__options = dict()
+        for key, value in options.items():
+            self.__options[str(key)] = value
         
     def select(self):
         while True:
             print(self.__prompt)
             if self.__options:
+                print(f'Options: {[option for option in self.__options.keys()]}')
+                '''
                 for option  in self.__options.keys():
                     print(f'\t{option})')
                 selection = None
-            
+                '''
                 selection = self.__options.get(input('Your selection: ').lower(), None)
                 if selection: return selection()
                 else: print(f'\nERROR: Your input was not recoginzed, please review the listed options and try again.\nValid selections are {tuple(self.__options.keys())}.')
@@ -44,6 +48,8 @@ class Menu:
 #######################################################
 if __name__ == '__main__':
 
+    '''
+    # Testing Menu().collect_number
     user_number = Menu('Some prompt.').collect_number()
     print(f'\nYou entered a {user_number}, which is a {type(user_number)}.')
 
@@ -57,6 +63,6 @@ if __name__ == '__main__':
     
     test_1 = lambda: choice_1()
     prompt = 'Make a selection:'
-    choices = {'1': choice_1, '2': choice_2}
+    choices = {1: choice_1, 2: choice_2}
     Menu(prompt, choices).select()
-    '''
+    ''' #'''
