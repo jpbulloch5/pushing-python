@@ -1,15 +1,15 @@
-from datetime import date
 from KeySet import KeySet, Key
 from Table import Table
 from typing import OrderedDict
 
-class PrimaryKeyTable(Table):
-    def __init__(self, explicit_categories: set, primary_key_set: KeySet = KeySet(0,99999)) -> None:
-        super().__init__(initial_record=None, explicit_categories=explicit_categories)
+class KeyTable(Table):
+    def __init__(self, categories: set, primary_key_set: KeySet = KeySet(0,99999)) -> None:
+        
         self.__primary_key_set = primary_key_set
-        self.__categories_set = set(explicit_categories)
-        self.__categories = tuple(explicit_categories)
+        self.__categories_set = set(categories)
+        self.__categories = tuple(categories)
         self.__records = OrderedDict()
+        super(KeyTable, self).__init__(categories)
     # END __init__()
 
     def add_records(self, *records_to_add: tuple):
@@ -63,11 +63,19 @@ class PrimaryKeyTable(Table):
         return f'\n{heading}\n{"=" * len(self.__categories)*23}{body}\n'
     # END __str__()
 
+    @property
+    def primary_key_set(self):
+        return self.__primary_key_set
+
+    @primary_key_set.setter
+    def primary_key_set(self, new_primary_key_set):
+        self.__primary_key_set = new_primary_key_set
+
 #######################################################
 #Testing code:
 #######################################################
 if __name__ == '__main__':
-    import datetime
+    from datetime import date
 
     class Money(int):
         def __str__(self) -> str:
@@ -75,8 +83,8 @@ if __name__ == '__main__':
     import datetime
 
 
-    my_table = PrimaryKeyTable(explicit_categories=('Item Description', 'Serial #', 'Location', 'Purchase Date', 'Purchase Price', 'End of Life'))
-    record_to_add = ('HP Laptop', 12597856879, 'Recruiting Office', date(2020, 4, 23), Money(4_000), date(2021,6,1))
+    my_table = KeyTable(('Item Description', 'Serial #',  'Location',          'Purchase Date',   'Purchase Price', 'End of Life'))
+    record_to_add =      ('HP Laptop',       12597856879, 'Recruiting Office', date(2020, 4, 23), Money(4_000),     date(2021,6,1))
     my_table.add_records(record_to_add)
     print(my_table.records)
     print(my_table)
