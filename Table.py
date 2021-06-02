@@ -1,4 +1,5 @@
 from typing import OrderedDict
+import KeySet
 
 class Table:
     '''
@@ -16,7 +17,7 @@ class Table:
         FIRST_RECORD = 0            # access the first record in the records tuple
         EXTRACT_LIST_CONTENTS = 0   # extract the nested contents from a list
 
-        self.__primary_key_set: set = set()
+        self.__primary_key_set = set()
         self.__categories_set: set = set()
         self.__categories: tuple = tuple()
         self.__records: OrderedDict = OrderedDict()
@@ -49,9 +50,6 @@ class Table:
             self.__primary_key_set.add(initial_primary_key)
         else:
             raise SyntaxError('ERROR: Instantiating a Table object requires either an initial record or the table categories (columns) must be provided explicitly')
-
-        
-
     # END __init__()
 
     def __str__(self):
@@ -76,6 +74,27 @@ class Table:
     @property
     def categories(self):
         return self.__categories
+
+    @categories.setter
+    def categories(self, new_categories):
+        self.__categories = tuple(new_categories)
+        self.__categories_set = set(new_categories)
+
+    @property
+    def categories_set(self):
+        return self.__categories_set
+
+    @property
+    def primary_key_set(self):
+        return self.__primary_key_set
+
+    @primary_key_set.setter
+    def primary_key_set(self, new_primary_key_set):
+        self.__primary_key_set = new_primary_key_set
+
+    @property
+    def records(self):
+        return self.__records
 
     def add_records(self, *records_to_add: dict or tuple):
         '''
@@ -126,21 +145,20 @@ class Table:
             else:
                 raise TypeError("ERROR: Record to add to the table must be an dict or tuple type.")
 
-            
-            
-
-
-
 #######################################################
 #Testing code:
 #######################################################
 if __name__ == '__main__':
-    #from typing import OrderedDict
     import datetime
-    Table
-    record_example_1: dict = {1: {'Last Name': 'Doe', 'First Name': 'John', 'Major': 'Computer Science', 'Date of Hire': datetime.date(2021,1,12), 'Salary': 45_000}}
-    record_example_2: dict = {2: {'Last Name': 'Lee', 'First Name': 'Bruce', 'Major': 'Physical Education', 'Date of Hire': datetime.date(1980,10,15), 'Salary': 280_000}}
-    tuple_record_example: tuple = (3, 'Musk', 'Elon', '-No Degree-', datetime.date(2020, 12, 25), 20_000)
+    
+    class Money(int):
+        def __str__(self) -> str:
+            return f'${self.__int__():>10,}'
+    
+    
+    record_example_1: dict = {1: {'Last Name': 'Doe', 'First Name': 'John', 'Major': 'Computer Science', 'Date of Hire': datetime.date(2021,1,12), 'Salary': Money(45_000)}}
+    record_example_2: dict = {2: {'Last Name': 'Lee', 'First Name': 'Bruce', 'Major': 'Physical Education', 'Date of Hire': datetime.date(1980,10,15), 'Salary': Money(2_800_000)}}
+    tuple_record_example: tuple = (3, 'Musk', 'Elon', '-No Degree-', datetime.date(2020, 12, 25), Money(20_000))
     table_example = Table(record_example_1)
     table_example.add_records(record_example_2)
     table_example.add_records(tuple_record_example)
