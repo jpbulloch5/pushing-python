@@ -24,7 +24,7 @@ Main Menu
 6) **Update a record
 7) **Retrieve a record by its primary key
 8) **Generate a report
-9) Exit the program
+9)   Exit the program
 
 ** = Not implemented yet.
         ''', 
@@ -110,7 +110,7 @@ def retrieve_by_key():
 def generate_report():
     not_implemented_yet()
 
-# 9) Exit the program
+# 9)   Exit the program
 def exit_program():
     print('\nExiting program...\n')
     exit()

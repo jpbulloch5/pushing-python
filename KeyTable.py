@@ -12,7 +12,7 @@ class KeyTable(Table):
         super(KeyTable, self).__init__(categories)
     # END __init__()
 
-    def add_records(self, key_override = None, *records_to_add: tuple):
+    def __add_record(self, record_to_add: tuple):
         '''
         Adds one or more records to the Table.
 
@@ -28,17 +28,24 @@ class KeyTable(Table):
                     
         '''
         
+        #if len(record_to_add) == len(self.__categories):
+        primary_key_to_add: Key = self.__primary_key_set.generate_new()
+        fields_to_add: dict = dict()
+        for column, data in enumerate(record_to_add):
+                try:
+                    fields_to_add[self.__categories[column-1]] = data
+                except IndexError:
+                    print('IndexError(Handled): Found more fields than table categories, extra fields were truncated.')
+        record_to_add: OrderedDict = {primary_key_to_add: fields_to_add}
+        self.__records[primary_key_to_add._key] = fields_to_add
+
+    def add_records(self, records_to_add):
         for record_to_add in records_to_add:
-            if len(record_to_add) == len(self.__categories):
-                primary_key_to_add: Key = self.__primary_key_set.generate_new(key_override)
-                fields_to_add: dict = dict()
-                for column, data in enumerate(record_to_add):
-                        fields_to_add[self.__categories[column-1]] = data
-                record_to_add: OrderedDict = {primary_key_to_add: fields_to_add}
-                self.__records[primary_key_to_add._key] = fields_to_add
+            if isinstance(record_to_add, tuple):
+                self.__add_record(record_to_add)
             else:
-                raise SyntaxError('ERROR: The record you attempted to add does not contain the same categories as the table.')
-            print(self.__records)
+                self.__add_record(records_to_add)
+                return
 
     def __str__(self):
         '''
@@ -84,9 +91,6 @@ if __name__ == '__main__':
 
 
     my_table = KeyTable(('Item Description', 'Serial #',  'Location',          'Purchase Date',   'Purchase Price', 'End of Life'))
-    record_to_add =      ('HP Laptop',       12597856879, 'Recruiting Office', date(2020, 4, 23), Money(4_000),     date(2021,6,1))
-    my_table.add_records(record_to_add)
-    print(my_table.records)
+    my_table.add_records(('HP Laptop',       12597856879, 'Recruiting Office', date(2020, 4, 23), Money(4_000),     date(2021,6,1)))
     print(my_table)
-    print(my_table.records)
     

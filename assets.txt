@@ -1,0 +1,4 @@
+Laptop-10, Recruiting, 2018-4-12, 4000, 2022-4-12, 0.1
+Laptop-20, Recruiting, 2018-4-12, 4000, 2022-4-12, 0.1
+Laptop-30, Recruiting, 2018-4-12, 4000, 2022-4-12, 0.1
+Laptop-40, Recruiting, 2018-4-12, 4000, 2022-4-12, 0.1
