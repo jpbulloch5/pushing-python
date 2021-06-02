@@ -12,25 +12,25 @@ class KeyTable(Table):
         super(KeyTable, self).__init__(categories)
     # END __init__()
 
-    def add_records(self, *records_to_add: tuple):
+    def add_records(self, key_override = None, *records_to_add: tuple):
         '''
         Adds one or more records to the Table.
 
         Parameter
         ---------
-        *records : nested dicts, or tuples
+        key_override: int
+            The primary key value you would like to use for this record
+            If the key already exists, it will assign the next valid, uniqe
+            value instead.
+        *records : tuple
             The records to be added to the table
-            Syntax : nested dicts
-                {primary_key: {category_1: data_1, category_2: data_2}}
-            Syntax : tuples
-                (primary_key, data_1, data_2)
-                    When using tuples, the categories are extracted from the Table categories and mapped in order
+            NOTE: do not include the primary key for the record in the tuple
                     
         '''
         
         for record_to_add in records_to_add:
             if len(record_to_add) == len(self.__categories):
-                primary_key_to_add: Key = self.__primary_key_set.generate_new()
+                primary_key_to_add: Key = self.__primary_key_set.generate_new(key_override)
                 fields_to_add: dict = dict()
                 for column, data in enumerate(record_to_add):
                         fields_to_add[self.__categories[column-1]] = data
