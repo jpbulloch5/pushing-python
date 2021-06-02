@@ -135,9 +135,9 @@ class Table:
                     fields_to_add: dict = dict()
                     for column, data in enumerate(record_to_add):
                         if column == PRIMARY_KEY_FROM_TUPLE:
-                            primary_key_to_add = record_to_add[column]
+                            primary_key_to_add = data
                         else:
-                            fields_to_add[self.__categories[column-1]] = record_to_add[column]
+                            fields_to_add[self.__categories[column-1]] = data
                     record_to_add: OrderedDict = {primary_key_to_add: fields_to_add}
                     self.__records[primary_key_to_add] = fields_to_add
                 else:
